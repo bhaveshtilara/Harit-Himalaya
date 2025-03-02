@@ -1,16 +1,29 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
 export default function Dashboard() {
-  const [points, setPoints] = useState(15); // Dummy points
-  const [cleanups, setCleanups] = useState(2); // Dummy cleanups
+  const [points, setPoints] = useState(() => {
+    return typeof window !== "undefined" ? parseInt(localStorage.getItem("points") || "15") : 15;
+  });
+  const [cleanups, setCleanups] = useState(() => {
+    return typeof window !== "undefined" ? parseInt(localStorage.getItem("cleanups") || "2") : 2;
+  });
+
+  // Sync local storage changes (e.g., from homepage)
+  useEffect(() => {
+    const handleStorageChange = () => {
+      setPoints(parseInt(localStorage.getItem("points") || "15"));
+      setCleanups(parseInt(localStorage.getItem("cleanups") || "2"));
+    };
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
 
   const handleLogWaste = () => {
     setPoints(points + 5);
-    setCleanups(cleanups + 1);
     alert("Waste logged! +5 points earned!");
   };
 
@@ -20,7 +33,7 @@ export default function Dashboard() {
       <nav className="sticky top-0 z-10 bg-[#1A3C34] text-white px-6 py-4 shadow-md">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div className="flex items-center space-x-2">
-            <Image src="/logo.jpg" alt="HaritHimalaya Logo" width={40} height={40} className="rounded-full" />
+            <Image src="/favicon.ico" alt="HaritHimalaya Logo" width={40} height={40} className="rounded-full" />
             <span className="text-2xl font-bold">HaritHimalaya</span>
           </div>
           <div className="flex space-x-6 items-center">
@@ -43,7 +56,7 @@ export default function Dashboard() {
         <h1 className="text-3xl font-bold text-[#1A3C34] mb-8 text-center">Your HaritHimalaya Dashboard</h1>
         <div className="bg-white p-6 rounded-lg shadow-lg space-y-6">
           <div className="flex items-center space-x-4">
-            <Image src="/logo.jpg" alt="Profile" width={60} height={60} className="rounded-full" />
+            <Image src="/favicon.ico" alt="Profile" width={60} height={60} className="rounded-full" />
             <div>
               <h2 className="text-xl font-semibold text-[#2F855A]">Priya</h2>
               <p className="text-gray-600">Eco-Warrior | Valley of Flowers Trekker</p>
@@ -67,7 +80,7 @@ export default function Dashboard() {
             onClick={handleLogWaste}
             className="w-full bg-[#2F855A] text-white py-3 rounded-md hover:bg-[#276749] transition duration-300"
           >
-            Log More Waste
+            Log More Waste (+5)
           </button>
         </div>
       </main>
@@ -76,7 +89,7 @@ export default function Dashboard() {
       <footer className="bg-[#1A3C34] text-white py-6 px-6">
         <div className="max-w-7xl mx-auto text-center">
           <div className="flex justify-center items-center space-x-2 mb-2">
-            <Image src="/logo.jpg" alt="HaritHimalaya Logo" width={30} height={30} className="rounded-full" />
+            <Image src="/favicon.ico" alt="HaritHimalaya Logo" width={30} height={30} className="rounded-full" />
             <span className="text-lg font-bold">HaritHimalaya</span>
           </div>
           <p className="text-gray-200">Built with ❤️ for Uttarakhand’s mountains by Team Hackathon</p>

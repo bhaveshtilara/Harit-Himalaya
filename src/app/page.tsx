@@ -6,13 +6,11 @@ import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import "leaflet/dist/leaflet.css";
 
-// Dynamic imports for Leaflet components
 const MapContainer = dynamic(() => import("react-leaflet").then((mod) => mod.MapContainer), { ssr: false });
 const TileLayer = dynamic(() => import("react-leaflet").then((mod) => mod.TileLayer), { ssr: false });
 const Marker = dynamic(() => import("react-leaflet").then((mod) => mod.Marker), { ssr: false });
 const Popup = dynamic(() => import("react-leaflet").then((mod) => mod.Popup), { ssr: false });
 
-// Custom icons (client-side only)
 const initializeIcons = () => {
   const L = require("leaflet");
   return {
@@ -42,9 +40,21 @@ export default function Home() {
     { id: 2, coords: [30.7290, 79.6065], description: "5 wrappers near campsite", status: "cleaned" },
     { id: 3, coords: [30.7275, 79.6040], description: "20 kg trash near Roopkund", status: "dirty" },
   ]);
-  const [selectedSpot, setSelectedSpot] = useState(null); // Track selected spot to clean
+  const [selectedSpot, setSelectedSpot] = useState(null);
+  const [points, setPoints] = useState(() => {
+    return typeof window !== "undefined" ? parseInt(localStorage.getItem("points") || "15") : 15;
+  });
+  const [cleanups, setCleanups] = useState(() => {
+    return typeof window !== "undefined" ? parseInt(localStorage.getItem("cleanups") || "2") : 2;
+  });
 
-  // Initialize Leaflet icons on client side
+  // Dummy leaderboard data (Priya’s points sync with local storage)
+  const [leaderboardPreview, setLeaderboardPreview] = useState(() => [
+    { rank: 1, name: "Priya Sharma", points: parseInt(localStorage.getItem("points") || "15"), cleanups: parseInt(localStorage.getItem("cleanups") || "2") },
+    { rank: 2, name: "Aman Rawat", points: 120, cleanups: 10 },
+    { rank: 3, name: "Riya Bisht", points: 95, cleanups: 8 },
+  ]);
+
   useEffect(() => {
     if (typeof window !== "undefined") {
       const { redIcon, greenIcon } = initializeIcons();
@@ -60,7 +70,19 @@ export default function Home() {
     }
   }, []);
 
-  // Log new waste spot
+  // Sync points, cleanups, and leaderboard to local storage
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("points", points.toString());
+      localStorage.setItem("cleanups", cleanups.toString());
+      setLeaderboardPreview((prev) =>
+        prev.map((leader) =>
+          leader.rank === 1 ? { ...leader, points, cleanups } : leader
+        )
+      );
+    }
+  }, [points, cleanups]);
+
   const handleLogWaste = () => {
     const newId = wasteSpots.length + 1;
     const randomOffsetLat = (Math.random() - 0.5) * 0.005;
@@ -72,10 +94,10 @@ export default function Home() {
       status: "dirty",
     };
     setWasteSpots([...wasteSpots, newSpot]);
-    alert("Waste logged! Check the map and head to Dashboard for points!");
+    setPoints(points + 5);
+    alert("Waste logged! +5 points earned—check the map and Dashboard!");
   };
 
-  // Clean selected waste spot
   const handleCleanWaste = () => {
     if (!selectedSpot) {
       alert("Please select a waste spot to clean by clicking its marker!");
@@ -90,10 +112,11 @@ export default function Home() {
     );
     setWasteSpots(updatedSpots);
     setSelectedSpot({ ...selectedSpot, status: "cleaned" });
+    setPoints(points + 10);
+    setCleanups(cleanups + 1);
     alert("Spot cleaned! +10 points earned—check your Dashboard!");
   };
 
-  // Handle marker click to select spot
   const handleMarkerClick = (spot) => {
     setSelectedSpot(spot);
   };
@@ -170,12 +193,17 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Map Section */}
+      {/* Map Section with Points */}
       <section className="max-w-7xl mx-auto py-12 px-6">
         <h2 className="text-3xl font-bold text-[#1A3C34] text-center mb-8">Cleanup in Action</h2>
         <div className="bg-white p-4 rounded-lg shadow-lg">
+          <div className="text-center mb-4">
+            <p className="text-lg text-gray-700">
+              Your Clean Mountain Points: <span className="font-bold text-[#2F855A] text-2xl">{points}</span>
+            </p>
+          </div>
           <MapContainer
-            center={[30.7281, 79.6059]} // Valley of Flowers area
+            center={[30.7281, 79.6059]}
             zoom={12}
             style={{ height: "400px", width: "100%" }}
             className="rounded-md"
@@ -189,7 +217,7 @@ export default function Home() {
                 key={spot.id}
                 position={spot.coords}
                 icon={spot.status === "dirty" ? icons.redIcon : icons.greenIcon}
-                eventHandlers={{ click: () => handleMarkerClick(spot) }} // Select on click
+                eventHandlers={{ click: () => handleMarkerClick(spot) }}
               >
                 <Popup>{spot.description} - {spot.status}</Popup>
               </Marker>
@@ -204,16 +232,44 @@ export default function Home() {
                 onClick={handleLogWaste}
                 className="bg-[#2F855A] text-white px-6 py-2 rounded-md hover:bg-[#276749] transition duration-300 transform hover:scale-105"
               >
-                Log New Waste Spot
+                Log New Waste Spot (+5)
               </button>
               <button
                 onClick={handleCleanWaste}
                 className="bg-[#1A3C34] text-white px-6 py-2 rounded-md hover:bg-[#16332D] transition duration-300 transform hover:scale-105"
               >
-                Clean Waste Spot
+                Clean Waste Spot (+10)
               </button>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Leaderboard Preview Section */}
+      <section className="max-w-7xl mx-auto py-12 px-6">
+        <h2 className="text-3xl font-bold text-[#1A3C34] text-center mb-8">Top Cleaners Preview</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {leaderboardPreview.slice(0, 3).map((leader) => (
+            <div
+              key={leader.rank}
+              className="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition duration-300 text-center"
+            >
+              <p className="text-2xl font-bold text-[#2F855A] mb-2">
+                {leader.rank === 1 ? "🥇" : leader.rank === 2 ? "🥈" : "🥉"} #{leader.rank}
+              </p>
+              <p className="text-lg font-semibold text-gray-700">{leader.name}</p>
+              <p className="text-gray-600">Points: <span className="text-[#2F855A] font-bold">{leader.points}</span></p>
+              <p className="text-gray-600">Cleanups: <span className="text-[#2F855A] font-bold">{leader.cleanups}</span></p>
+            </div>
+          ))}
+        </div>
+        <div className="text-center mt-6">
+          <Link
+            href="/leaderboard"
+            className="bg-[#2F855A] text-white px-6 py-2 rounded-md hover:bg-[#276749] transition duration-300 inline-block"
+          >
+            View Full Leaderboard
+          </Link>
         </div>
       </section>
 
