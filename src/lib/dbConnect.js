@@ -11,13 +11,11 @@ let cached = global.mongoose;
 if (!cached) {
   cached = global.mongoose = { conn: null, promise: null };
 }
-
 async function dbConnect() {
   if (cached.conn) {
     console.log('using cached database connection');
     return cached.conn;
   }
-
   if (!cached.promise) {
     const opts = {
       bufferCommands: false,
@@ -28,7 +26,6 @@ async function dbConnect() {
       return mongoose;
     });
   }
-
   try {
     cached.conn = await cached.promise;
   } catch (e) {
