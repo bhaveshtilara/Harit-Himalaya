@@ -6,7 +6,6 @@ import { NextResponse } from 'next/server';
 
 export async function POST(request) {
   await dbConnect();
-
   try {
     const verifierData = getDataFromToken(request);
     if (!verifierData) {
@@ -44,7 +43,7 @@ export async function POST(request) {
     await journey.save();
     const pointsAwarded = Math.round(wasteCollectedKg * 10); 
     await User.findByIdAndUpdate(journey.trekker, {
-      $inc: { points: pointsAwarded },
+      $inc: { points: pointsAwarded }, 
     });
 
     return NextResponse.json(
