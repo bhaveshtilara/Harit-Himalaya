@@ -9,13 +9,15 @@ export async function POST(request) {
 
   try {
     const { email, password } = await request.json();
+
     const user = await User.findOne({ email });
     if (!user) {
       return NextResponse.json(
         { success: false, message: 'Invalid credentials' },
-        { status: 401 } 
+        { status: 401 }
       );
     }
+
     const isPasswordCorrect = await bcrypt.compare(password, user.password);
     if (!isPasswordCorrect) {
       return NextResponse.json(
@@ -23,25 +25,30 @@ export async function POST(request) {
         { status: 401 }
       );
     }
+
     const tokenData = {
       id: user._id,
       email: user.email,
       role: user.role,
     };
+
     const token = jwt.sign(tokenData, process.env.JWT_SECRET, {
-      expiresIn: '1d', 
+      expiresIn: '1d',
     });
+
     const response = NextResponse.json(
       {
         success: true,
         message: 'Login successful',
+        role: user.role,
       },
       { status: 200 }
     );
+
     response.cookies.set('token', token, {
-      httpOnly: true, 
-      secure: process.env.NODE_ENV === 'production', 
-      maxAge: 60 * 60 * 24, 
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 60 * 60 * 24,
       path: '/',
     });
 

@@ -1,51 +1,36 @@
-import React from 'react';
-function Page() {
+"use client";
+import Link from 'next/link';
+
+export default function HomePage() {
   return (
-    <div className="min-h-screen bg-green-50 font-sans">
-      {/* Header */}
-      <header className="bg-green-600 text-white p-4 text-center">
-        <h1 className="text-4xl font-bold">Harit Himalaya</h1>
-        <p className="text-xl mt-2">Keep Uttarakhand’s Mountains Clean</p>
-      </header>
-
-      {/* Main Section */}
-      <main className="max-w-4xl mx-auto p-6 text-center">
-        <section className="mb-8">
-          <h2 className="text-2xl font-semibold text-green-800 mb-4">
-            Why We Need Your Help
-          </h2>
-          <p className="text-lg text-gray-700">
-            Tourism in Uttarakhand’s mountains leaves behind trash like plastic
-            bottles and wrappers. This hurts our beautiful trails, rivers, and
-            wildlife, and burdens local communities. Without an organized way to
-            clean up, the problem keeps growing.
-          </p>
-        </section>
-
-        <section className="mb-8">
-          <h2 className="text-2xl font-semibold text-green-800 mb-4">
-            Join the Cleanup
-          </h2>
-          <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <button className="bg-green-500 text-white text-lg font-medium py-3 px-6 rounded-lg hover:bg-green-600">
-              Report Trash
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 text-gray-800 p-4">
+      <main className="text-center max-w-2xl mx-auto">
+        <h1 className="text-5xl md:text-6xl font-extrabold text-green-600">
+          Harit Himalaya
+        </h1>
+        <p className="mt-4 text-lg md:text-xl text-gray-600">
+          A community-driven initiative to keep our sacred mountains pristine.
+        </p>
+        <p className="mt-6 text-md md:text-lg">
+          Join us in our mission to track and clean waste from the trekking trails of the Himalayas. Every trekker can be a warrior for our environment. Log your cleanup efforts, earn points, and become a part of the solution.
+        </p>
+        <div className="mt-8 flex justify-center gap-4">
+          <Link href="/login">
+            <button className="px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition-colors duration-300">
+              Login
             </button>
-            <button className="bg-green-500 text-white text-lg font-medium py-3 px-6 rounded-lg hover:bg-green-600">
-              View Cleanup Data
+          </Link>
+          <Link href="/register">
+            <button className="px-8 py-3 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 transition-colors duration-300">
+              Register
             </button>
-          </div>
-          <p className="text-gray-600 mt-4">
-            Help trekkers and locals make Uttarakhand cleaner!
-          </p>
-        </section>
+          </Link>
+        </div>
       </main>
 
-      {/* Footer */}
-      <footer className="bg-green-600 text-white p-4 text-center">
-        <p>© 2025 [Harit-Himalaya]. All rights reserved.</p>
+      <footer className="absolute bottom-4 text-gray-500 text-sm">
+        <p>Built for a cleaner tomorrow.</p>
       </footer>
     </div>
   );
 }
-
-export default Page;
