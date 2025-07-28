@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import toast from 'react-hot-toast'; 
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -17,12 +18,11 @@ export default function RegisterPage() {
     try {
       setLoading(true);
       const response = await axios.post('/api/auth/register', user);
-      console.log('Registration success', response.data);
-      alert('Registration successful! Please log in.');
-      router.push('/login'); 
+      toast.success('Registration successful! Please log in.'); 
+      router.push('/login');
     } catch (error) {
-      console.log('Registration failed', error.response?.data?.message || error.message);
-      alert(`Registration failed: ${error.response?.data?.message || 'Please try again.'}`);
+      const errorMessage = error.response?.data?.message || 'Please try again.';
+      toast.error(`Registration failed: ${errorMessage}`); 
     } finally {
       setLoading(false);
     }
@@ -62,9 +62,10 @@ export default function RegisterPage() {
         />
         <button
           onClick={onRegister}
-          className="p-2 border border-gray-300 rounded-lg mt-4 hover:bg-gray-100"
+          disabled={loading}
+          className="p-2 border border-gray-300 rounded-lg mt-4 hover:bg-gray-100 disabled:bg-gray-200"
         >
-          Register
+          {loading ? 'Processing...' : 'Register'}
         </button>
         <Link href="/login" className="text-sm mt-4 text-center">
           Already have an account? Login here.

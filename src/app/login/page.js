@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import toast from 'react-hot-toast';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -17,8 +18,10 @@ export default function LoginPage() {
     try {
       setLoading(true);
       const response = await axios.post('/api/auth/login', user);
-      console.log('Login success', response.data);
-      if (response.data.role === 'VERIFIER') {
+      toast.success('Login successful!');
+      if (response.data.role === 'ADMIN') {
+        router.push('/admin/dashboard');
+      } else if (response.data.role === 'VERIFIER') {
         router.push('/verifier/dashboard');
       } else {
         router.push('/dashboard');
@@ -26,7 +29,7 @@ export default function LoginPage() {
 
     } catch (error) {
       console.log('Login failed', error.message);
-      alert('Login failed. Please check your credentials.');
+      toast.error('Login failed. Please check your credentials.');
     } finally {
       setLoading(false);
     }
@@ -57,9 +60,10 @@ export default function LoginPage() {
         />
         <button
           onClick={onLogin}
-          className="p-2 border border-gray-300 rounded-lg mt-4 hover:bg-gray-100"
+          disabled={loading}
+          className="p-2 border border-gray-300 rounded-lg mt-4 hover:bg-gray-100 disabled:bg-gray-200"
         >
-          Login
+          {loading ? 'Processing...' : 'Login'}
         </button>
         <Link href="/register" className="text-sm mt-4 text-center">
           Do not have an account? Register here.

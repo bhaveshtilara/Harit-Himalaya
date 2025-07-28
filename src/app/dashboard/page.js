@@ -2,21 +2,23 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation'; 
+import { useRouter } from 'next/navigation';
+import toast from 'react-hot-toast';
 
 export default function DashboardPage() {
-  const router = useRouter(); 
+  const router = useRouter();
   const [user, setUser] = useState(null);
   const [journeys, setJourneys] = useState([]);
   const [loading, setLoading] = useState(true);
+
   const onLogout = async () => {
     try {
       await axios.get('/api/auth/logout');
-      alert('Logout successful');
+      toast.success('Logout successful');
       router.push('/login');
     } catch (error) {
       console.error('Logout failed:', error.message);
-      alert('Logout failed. Please try again.');
+      toast.error('Logout failed. Please try again.');
     }
   };
 
@@ -32,13 +34,13 @@ export default function DashboardPage() {
         setJourneys(journeysResponse.data.data);
       } catch (error) {
         console.error('Failed to fetch dashboard data:', error);
-        router.push('/login'); 
+        router.push('/login');
       } finally {
         setLoading(false);
       }
     };
     fetchData();
-  }, [router]); 
+  }, [router]);
 
   if (loading) {
     return <div className="text-center p-10">Loading Dashboard...</div>;
@@ -46,9 +48,14 @@ export default function DashboardPage() {
 
   return (
     <div className="container mx-auto p-4 md:p-6">
-      <div className="flex justify-between items-center mb-4">
+      <div className="flex justify-between items-center mb-4 flex-wrap gap-2">
         <h1 className="text-2xl md:text-3xl font-bold">Welcome, {user?.name}!</h1>
         <div className="flex gap-4">
+          <Link href="/profile">
+            <button className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded transition-colors duration-300">
+              My Profile
+            </button>
+          </Link>
           <Link href="/leaderboard">
             <button className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded transition-colors duration-300">
               Leaderboard 🏆
@@ -68,27 +75,14 @@ export default function DashboardPage() {
       </div>
       <h2 className="text-2xl font-semibold mb-3">Your Cleanup Journeys</h2>
       <div className="space-y-4">
-        {journeys.length > 0 ? (
-          journeys.map((journey) => (
-            <div key={journey._id} className="p-4 border rounded-lg shadow-sm bg-white">
-              <h3 className="text-xl font-bold">{journey.location.trailName}</h3>
-              <p className="text-gray-600">Date: {new Date(journey.createdAt).toLocaleDateString()}</p>
-              <p className="text-gray-600">Waste Collected: {journey.wasteCollectedKg} kg</p>
-              <p>
-                Status:{" "}
-                <span
-                  className={`font-semibold ${
-                    journey.status === 'COMPLETED' ? 'text-green-600' : 'text-yellow-600'
-                  }`}
-                >
-                  {journey.status}
-                </span>
-              </p>
-            </div>
-          ))
-        ) : (
-          <p>You haven not started any journeys yet.</p>
-        )}
+        {journeys.map((journey) => (
+          <div key={journey._id} className="p-4 border rounded-lg shadow-sm bg-white">
+            <h3 className="text-xl font-bold">{journey.location.trailName}</h3>
+            <p className="text-gray-600">Date: {new Date(journey.createdAt).toLocaleDateString()}</p>
+            <p className="text-gray-600">Waste Collected: {journey.wasteCollectedKg} kg</p>
+            <p>Status: <span className={`font-semibold ${journey.status === 'COMPLETED' ? 'text-green-600' : 'text-yellow-600'}`}>{journey.status}</span></p>
+          </div>
+        ))}
       </div>
     </div>
   );

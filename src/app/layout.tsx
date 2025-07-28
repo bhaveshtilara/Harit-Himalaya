@@ -1,19 +1,20 @@
+import { Inter } from 'next/font/google';
 import './globals.css';
-import { Metadata } from 'next';
-import React, { ReactNode } from 'react';
+import { Toaster } from 'react-hot-toast';
+import type { ReactNode } from 'react'; 
+const inter = Inter({ subsets: ['latin'] });
 
-export const metadata: Metadata = {
+export const metadata = {
   title: 'Harit Himalaya',
-  icons: {
-    icon: '/favicon.ico', 
-  },
+  description: 'A community-driven initiative to keep our sacred mountains pristine.',
 };
-
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default function RootLayout({ children }: { children: ReactNode }) { 
   return (
     <html lang="en">
-      <head />
-      <body>{children}</body>
+      <body className={`${inter.className} bg-gray-50`}>
+        <Toaster position="top-center" />
+        {children}
+      </body>
     </html>
   );
 }
