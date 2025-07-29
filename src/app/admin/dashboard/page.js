@@ -4,8 +4,6 @@ import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import Navbar from '@/components/Navbar';
-
-// A simple stat card component
 const StatCard = ({ title, value, icon }) => (
   <div className="bg-white p-6 rounded-lg shadow-md">
     <div className="flex items-center">
@@ -27,8 +25,6 @@ export default function AdminDashboard() {
   
   const [newLocation, setNewLocation] = useState({ name: '', trailName: '' });
   const [editingUser, setEditingUser] = useState(null);
-
-  // Fetches all data needed for the admin panel
   const fetchData = async () => {
     try {
       const [statsRes, usersRes, locationsRes] = await Promise.all([
@@ -50,8 +46,6 @@ export default function AdminDashboard() {
   useEffect(() => {
     fetchData();
   }, [router]);
-  
-  // Handler for creating a new location
   const handleLocationSubmit = async (e) => {
     e.preventDefault();
     const toastId = toast.loading('Creating location...');
@@ -59,13 +53,11 @@ export default function AdminDashboard() {
       await axios.post('/api/locations', newLocation);
       toast.success('Location created successfully!', { id: toastId });
       setNewLocation({ name: '', trailName: '' });
-      fetchData(); // Refresh all data
+      fetchData(); 
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to create location.', { id: toastId });
     }
   };
-
-  // Handler for updating a user
   const handleUserUpdate = async (e) => {
     e.preventDefault();
     const toastId = toast.loading('Updating user...');
@@ -73,47 +65,46 @@ export default function AdminDashboard() {
       await axios.put(`/api/admin/users/${editingUser._id}`, {
         role: editingUser.role,
         assignedLocation: editingUser.assignedLocation || null,
-        status: editingUser.status, // Send the status
+        status: editingUser.status,
       });
       toast.success('User updated successfully!', { id: toastId });
       setEditingUser(null);
-      fetchData(); // Refresh all data
+      fetchData(); 
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to update user.', { id: toastId });
     }
   };
 
-  if (loading) return (
-    <div>
-        <Navbar/>
-        <div className="min-h-screen flex items-center justify-center">Loading Admin Panel...</div>
-    </div>
-  );
+  if (loading) {
+      return (
+        <div>
+            <Navbar/>
+            <div className="min-h-screen flex items-center justify-center">Loading Admin Panel...</div>
+        </div>
+      );
+  }
 
   return (
     <div>
         <Navbar />
         <main className="container mx-auto p-4 md:p-6 bg-gray-50">
             <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-6">Admin Overview</h1>
-            {/* Stats Section */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
                 <StatCard title="Total Users" value={stats.users} icon={'👥'}/>
                 <StatCard title="Total Locations" value={stats.locations} icon={'📍'}/>
                 <StatCard title="Journeys Completed" value={stats.completedJourneys} icon={'✅'}/>
             </div>
-
-            {/* Management Section */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="lg:col-span-2 bg-white p-6 rounded-lg shadow-md">
                   <h2 className="text-2xl font-semibold mb-4">User Management</h2>
                   <div className="overflow-x-auto">
                     <table className="min-w-full">
-                      <thead className="bg-gray-100"><tr><th className="py-2 px-4 text-left">Name</th><th className="py-2 px-4 text-left">Role</th><th className="py-2 px-4 text-left">Status</th><th className="py-2 px-4 text-left">Actions</th></tr></thead>
+                      <thead className="bg-gray-100"><tr><th className="py-2 px-4 text-left">Name / Email</th><th className="py-2 px-4 text-left">Role</th><th className="py-2 px-4 text-left">Status</th><th className="py-2 px-4 text-left">Actions</th></tr></thead>
                       <tbody>
                         {users.map((user) => (
                           <tr key={user._id} className="border-b hover:bg-gray-50">
                             <td className="py-2 px-4">
-                                <div>{user.name}</div>
+                                <div className="font-medium">{user.name}</div>
                                 <div className="text-xs text-gray-500">{user.email}</div>
                             </td>
                             <td className="py-2 px-4">{user.role}</td>

@@ -15,10 +15,30 @@ export default function VerifierDashboard() {
   const [wasteAmount, setWasteAmount] = useState('');
   const [completingJourneyId, setCompletingJourneyId] = useState(null);
 
-  const fetchData = async () => 
-  useEffect(() => { fetchData(); }, [router]);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const meResponse = await axios.get('/api/users/me');
+        if (meResponse.data.data.role !== 'VERIFIER') {
+          toast.error('Access Denied.');
+          router.push('/dashboard');
+          return;
+        }
+        setVerifier(meResponse.data.data);
 
-  const handleStartJourney = async (e) => {
+        const journeysResponse = await axios.get('/api/verifier/journeys');
+        setActiveJourneys(journeysResponse.data.data);
+      } catch (err) {
+        toast.error('Session expired. Please log in again.');
+        router.push('/login');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, [router]);
+
+ const handleStartJourney = async (e) => {
     e.preventDefault();
     const toastId = toast.loading('Starting journey...');
     try {
@@ -48,16 +68,21 @@ export default function VerifierDashboard() {
     }
   };
   
-  if (loading) return <div className="min-h-screen flex items-center justify-center">Loading Verifier Panel...</div>;
+  if (loading) {
+    return <div className="min-h-screen flex items-center justify-center">Loading Verifier Panel...</div>;
+  }
 
   return (
     <div>
       <Navbar />
       <main className="container mx-auto p-4 md:p-6">
+        {/* Header */}
         <div className="mb-8">
             <h1 className="text-3xl md:text-4xl font-bold text-gray-800">Verifier Control Panel</h1>
             <p className="text-gray-600">Managing journeys for: <span className="font-semibold text-green-600">{verifier?.assignedLocation?.name || 'your assigned location'}</span></p>
         </div>
+        
+        {/* On mobile, this will be a single column. On medium screens and up, a 3-column grid. */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="md:col-span-1 space-y-6">
                 <div className="bg-white p-6 rounded-lg shadow-md text-center">

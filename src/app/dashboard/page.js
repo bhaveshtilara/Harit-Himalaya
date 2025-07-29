@@ -2,7 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
-import Navbar from '@/components/Navbar'; 
+import Navbar from '@/components/Navbar';
+import toast from 'react-hot-toast'; 
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -22,7 +23,8 @@ export default function DashboardPage() {
         setJourneys(journeysResponse.data.data);
       } catch (error) {
         console.error('Failed to fetch dashboard data:', error);
-        router.push('/login');
+        toast.error('Session expired. Please log in.');
+        router.push('/login'); 
       } finally {
         setLoading(false);
       }
@@ -31,23 +33,28 @@ export default function DashboardPage() {
   }, [router]);
 
   if (loading) {
-    return <div className="text-center p-10 min-h-screen">Loading Dashboard...</div>;
+    return (
+        <div>
+            <Navbar/>
+            <div className="text-center p-10 min-h-screen">Loading Dashboard...</div>
+        </div>
+    );
   }
 
   return (
     <div>
       <Navbar />
       <main className="container mx-auto p-4 md:p-6">
-        <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">Welcome, {user?.name}!</h1>
-        <p className="text-gray-600 mb-6">Here's a summary of your impact. Thank you for your contribution!</p>
-
-        {/* Stats Card */}
+        <div className="flex flex-col md:flex-row justify-between md:items-center gap-4 mb-6">
+          <div>
+            <h1 className="text-3xl md:text-4xl font-bold text-gray-800">Welcome, {user?.name}!</h1>
+            <p className="text-gray-600 mt-1">Here's a summary of your impact. Thank you for your contribution!</p>
+          </div>
+        </div>
         <div className="bg-gradient-to-r from-green-500 to-emerald-600 text-white p-6 rounded-lg shadow-lg mb-8">
           <h2 className="text-lg font-semibold uppercase tracking-wider mb-2">Total Points</h2>
           <p className="text-5xl font-extrabold">{user?.points}</p>
         </div>
-
-        {/* Journeys Section */}
         <h2 className="text-2xl font-semibold mb-4 text-gray-700">Your Cleanup Journeys</h2>
         <div className="space-y-4">
           {journeys.length > 0 ? (
