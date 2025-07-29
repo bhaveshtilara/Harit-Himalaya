@@ -10,7 +10,7 @@ const userSchema = new mongoose.Schema(
     email: {
       type: String,
       required: [true, 'Email is required'],
-      unique: true, 
+      unique: true,
       lowercase: true,
       trim: true,
     },
@@ -20,18 +20,22 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ['TREKKER', 'VERIFIER', 'ADMIN'], 
-      default: 'TREKKER', 
+      enum: ['TREKKER', 'VERIFIER', 'ADMIN'],
+      default: 'TREKKER',
+    },
+    status: {
+      type: String,
+      enum: ['ACTIVE', 'BLOCKED'],
+      default: 'ACTIVE',
     },
     points: {
       type: Number,
-      default: 0, 
+      default: 0,
     },
-    // for verifier to give them location
     assignedLocation: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Location', 
-      required: false, 
+      ref: 'Location',
+      required: false,
     },
   },
   {

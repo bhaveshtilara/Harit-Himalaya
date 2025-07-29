@@ -10,12 +10,17 @@ export async function PUT(request, { params }) {
     if (!tokenData || tokenData.role !== 'ADMIN') {
       return NextResponse.json({ error: 'Not authorized' }, { status: 403 });
     }
+
     const { userId } = params;
-    const { role, assignedLocation } = await request.json();
+    const { role, assignedLocation, status } = await request.json(); 
+    const updateData = {};
+    if (role) updateData.role = role;
+    if (status) updateData.status = status;
+    updateData.assignedLocation = assignedLocation || null;
 
     const updatedUser = await User.findByIdAndUpdate(
       userId,
-      { role, assignedLocation },
+      updateData,
       { new: true }
     ).select('-password');
 
@@ -23,12 +28,7 @@ export async function PUT(request, { params }) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    return NextResponse.json({
-      success: true,
-      message: 'User updated successfully',
-      data: updatedUser,
-    });
-
+    return NextResponse.json({ success: true, message: 'User updated successfully', data: updatedUser });
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

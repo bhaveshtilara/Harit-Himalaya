@@ -4,7 +4,7 @@ import bcrypt from 'bcryptjs';
 import { NextResponse } from 'next/server';
 
 export async function POST(request) {
-  await dbConnect(); 
+  await dbConnect();
 
   try {
     const { name, email, password } = await request.json();
@@ -12,6 +12,12 @@ export async function POST(request) {
     if (existingUser) {
       return NextResponse.json(
         { success: false, message: 'User with this email already exists' },
+        { status: 400 }
+      );
+    }
+    if (!password || password.length < 6) {
+      return NextResponse.json(
+        { success: false, message: 'Password must be at least 6 characters long' },
         { status: 400 }
       );
     }
@@ -24,19 +30,21 @@ export async function POST(request) {
     });
 
     await newUser.save();
+
     const userResponse = {
       _id: newUser._id,
       name: newUser.name,
       email: newUser.email,
       role: newUser.role,
     };
+
     return NextResponse.json(
       {
         success: true,
         message: 'User registered successfully',
         user: userResponse,
       },
-      { status: 201 } 
+      { status: 201 }
     );
   } catch (error) {
     console.error('Error registering user:', error);

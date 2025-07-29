@@ -1,26 +1,14 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import toast from 'react-hot-toast';
+import Navbar from '@/components/Navbar'; 
 
 export default function DashboardPage() {
   const router = useRouter();
   const [user, setUser] = useState(null);
   const [journeys, setJourneys] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  const onLogout = async () => {
-    try {
-      await axios.get('/api/auth/logout');
-      toast.success('Logout successful');
-      router.push('/login');
-    } catch (error) {
-      console.error('Logout failed:', error.message);
-      toast.error('Logout failed. Please try again.');
-    }
-  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -43,47 +31,52 @@ export default function DashboardPage() {
   }, [router]);
 
   if (loading) {
-    return <div className="text-center p-10">Loading Dashboard...</div>;
+    return <div className="text-center p-10 min-h-screen">Loading Dashboard...</div>;
   }
 
   return (
-    <div className="container mx-auto p-4 md:p-6">
-      <div className="flex justify-between items-center mb-4 flex-wrap gap-2">
-        <h1 className="text-2xl md:text-3xl font-bold">Welcome, {user?.name}!</h1>
-        <div className="flex gap-4">
-          <Link href="/profile">
-            <button className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded transition-colors duration-300">
-              My Profile
-            </button>
-          </Link>
-          <Link href="/leaderboard">
-            <button className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded transition-colors duration-300">
-              Leaderboard 🏆
-            </button>
-          </Link>
-          <button
-            onClick={onLogout}
-            className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transition-colors duration-300"
-          >
-            Logout
-          </button>
+    <div>
+      <Navbar />
+      <main className="container mx-auto p-4 md:p-6">
+        <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">Welcome, {user?.name}!</h1>
+        <p className="text-gray-600 mb-6">Here's a summary of your impact. Thank you for your contribution!</p>
+
+        {/* Stats Card */}
+        <div className="bg-gradient-to-r from-green-500 to-emerald-600 text-white p-6 rounded-lg shadow-lg mb-8">
+          <h2 className="text-lg font-semibold uppercase tracking-wider mb-2">Total Points</h2>
+          <p className="text-5xl font-extrabold">{user?.points}</p>
         </div>
-      </div>
-      <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-6">
-        <strong className="font-bold">Total Points: </strong>
-        <span className="block sm:inline ml-2 text-lg">{user?.points}</span>
-      </div>
-      <h2 className="text-2xl font-semibold mb-3">Your Cleanup Journeys</h2>
-      <div className="space-y-4">
-        {journeys.map((journey) => (
-          <div key={journey._id} className="p-4 border rounded-lg shadow-sm bg-white">
-            <h3 className="text-xl font-bold">{journey.location.trailName}</h3>
-            <p className="text-gray-600">Date: {new Date(journey.createdAt).toLocaleDateString()}</p>
-            <p className="text-gray-600">Waste Collected: {journey.wasteCollectedKg} kg</p>
-            <p>Status: <span className={`font-semibold ${journey.status === 'COMPLETED' ? 'text-green-600' : 'text-yellow-600'}`}>{journey.status}</span></p>
-          </div>
-        ))}
-      </div>
+
+        {/* Journeys Section */}
+        <h2 className="text-2xl font-semibold mb-4 text-gray-700">Your Cleanup Journeys</h2>
+        <div className="space-y-4">
+          {journeys.length > 0 ? (
+            journeys.map((journey) => (
+              <div key={journey._id} className="p-5 border rounded-lg shadow-sm bg-white hover:shadow-md transition-shadow">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-800">{journey.location.trailName}</h3>
+                    <p className="text-sm text-gray-500">Date: {new Date(journey.createdAt).toLocaleDateString()}</p>
+                  </div>
+                  <span className={`px-3 py-1 text-xs font-semibold rounded-full ${
+                      journey.status === 'COMPLETED' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                    }`}>
+                    {journey.status}
+                  </span>
+                </div>
+                <div className="mt-4 pt-4 border-t border-gray-200">
+                  <p className="text-gray-700">Waste Collected: <span className="font-bold">{journey.wasteCollectedKg} kg</span></p>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="text-center p-10 border-2 border-dashed rounded-lg text-gray-500">
+              <p>You haven't started any journeys yet.</p>
+              <p className="mt-2 text-sm">Let's change that on your next trek!</p>
+            </div>
+          )}
+        </div>
+      </main>
     </div>
   );
 }

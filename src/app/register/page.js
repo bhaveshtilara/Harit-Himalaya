@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import toast from 'react-hot-toast'; 
+import toast from 'react-hot-toast';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -11,65 +11,112 @@ export default function RegisterPage() {
     name: '',
     email: '',
     password: '',
+    confirmPassword: '',
   });
   const [loading, setLoading] = useState(false);
 
   const onRegister = async () => {
+    if (user.password !== user.confirmPassword) {
+      toast.error("Passwords do not match!");
+      return;
+    }
+    if (user.password.length < 6) {
+      toast.error("Password must be at least 6 characters long.");
+      return;
+    }
+
     try {
       setLoading(true);
-      const response = await axios.post('/api/auth/register', user);
-      toast.success('Registration successful! Please log in.'); 
-      router.push('/login');
+      const apiCallPromise = axios.post('/api/auth/register', {
+        name: user.name,
+        email: user.email,
+        password: user.password,
+      });
+
+      // --- NEW, MORE ROBUST TOAST LOGIC ---
+      await toast.promise(apiCallPromise, {
+        loading: 'Creating account...',
+        success: 'Registration successful! Please log in.',
+        error: (err) => `Registration failed: ${err.response?.data?.message || 'Please try again.'}`
+      });
+      
+      router.push('/login'); 
+
     } catch (error) {
-      const errorMessage = error.response?.data?.message || 'Please try again.';
-      toast.error(`Registration failed: ${errorMessage}`); 
+      console.error("Registration error caught in component:", error);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen py-2">
-      <h1 className="text-2xl mb-4">{loading ? 'Processing...' : 'Register'}</h1>
-      <hr />
-      <div className="flex flex-col gap-2">
-        <label htmlFor="name">Name</label>
-        <input
-          className="p-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-600 text-black"
-          id="name"
-          type="text"
-          value={user.name}
-          onChange={(e) => setUser({ ...user, name: e.target.value })}
-          placeholder="Your Name"
-        />
-        <label htmlFor="email">Email</label>
-        <input
-          className="p-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-600 text-black"
-          id="email"
-          type="email"
-          value={user.email}
-          onChange={(e) => setUser({ ...user, email: e.target.value })}
-          placeholder="email"
-        />
-        <label htmlFor="password">Password</label>
-        <input
-          className="p-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-600 text-black"
-          id="password"
-          type="password"
-          value={user.password}
-          onChange={(e) => setUser({ ...user, password: e.target.value })}
-          placeholder="password"
-        />
-        <button
-          onClick={onRegister}
-          disabled={loading}
-          className="p-2 border border-gray-300 rounded-lg mt-4 hover:bg-gray-100 disabled:bg-gray-200"
-        >
-          {loading ? 'Processing...' : 'Register'}
-        </button>
-        <Link href="/login" className="text-sm mt-4 text-center">
-          Already have an account? Login here.
-        </Link>
+    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+      <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
+        <div className="text-center">
+          <h1 className="text-4xl font-extrabold text-green-600">Harit Himalaya</h1>
+          <p className="mt-2 text-gray-500">Create your account to join the mission.</p>
+        </div>
+        <div className="space-y-4">
+          <div>
+            <label htmlFor="name" className="text-sm font-medium text-gray-700">Full Name</label>
+            <input
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
+              id="name"
+              type="text"
+              value={user.name}
+              onChange={(e) => setUser({ ...user, name: e.target.value })}
+              placeholder="Your Name"
+            />
+          </div>
+          <div>
+            <label htmlFor="email" className="text-sm font-medium text-gray-700">Email Address</label>
+            <input
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
+              id="email"
+              type="email"
+              value={user.email}
+              onChange={(e) => setUser({ ...user, email: e.target.value })}
+              placeholder="you@example.com"
+            />
+          </div>
+          <div>
+            <label htmlFor="password"  className="text-sm font-medium text-gray-700">Password</label>
+            <input
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
+              id="password"
+              type="password"
+              value={user.password}
+              onChange={(e) => setUser({ ...user, password: e.target.value })}
+              placeholder="•••••••• (min. 6 characters)"
+            />
+          </div>
+          <div>
+            <label htmlFor="confirmPassword"  className="text-sm font-medium text-gray-700">Confirm Password</label>
+            <input
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
+              id="confirmPassword"
+              type="password"
+              value={user.confirmPassword}
+              onChange={(e) => setUser({ ...user, confirmPassword: e.target.value })}
+              placeholder="••••••••"
+            />
+          </div>
+        </div>
+        <div>
+          <button
+            onClick={onRegister}
+            disabled={loading}
+            className="w-full flex justify-center py-2 px-4 border rounded-md shadow-sm font-medium text-white bg-green-600 hover:bg-green-700 disabled:opacity-50"
+          >
+            {loading ? 'Processing...' : 'Create Account'}
+          </button>
+        </div>
+        <p className="text-sm text-center text-gray-600">
+          Already have an account?{' '}
+          <Link href="/login" className="font-medium text-green-600 hover:underline">
+            Sign in here
+          </Link>
+        </p>
       </div>
     </div>
   );

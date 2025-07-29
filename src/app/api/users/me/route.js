@@ -1,6 +1,7 @@
 import { getDataFromToken } from '@/helpers/getDataFromToken';
 import dbConnect from '@/lib/dbConnect';
 import User from '@/models/user.model';
+import Location from '@/models/location.model'; 
 import { NextResponse } from 'next/server';
 
 export async function GET(request) {
@@ -10,7 +11,10 @@ export async function GET(request) {
     if (!tokenData) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
-    const user = await User.findById(tokenData.id).select('-password'); 
+    const user = await User.findById(tokenData.id)
+      .select('-password')
+      .populate('assignedLocation');
+
     if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }

@@ -1,8 +1,8 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import Navbar from '@/components/Navbar'; 
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -16,7 +16,7 @@ export default function ProfilePage() {
         setUser(response.data.data);
       } catch (error) {
         console.error('Failed to fetch profile:', error);
-        router.push('/login'); 
+        router.push('/login');
       } finally {
         setLoading(false);
       }
@@ -25,42 +25,47 @@ export default function ProfilePage() {
   }, [router]);
 
   if (loading) {
-    return <p className="text-center p-10">Loading Profile...</p>;
+    return <div className="text-center p-10 min-h-screen">Loading Profile...</div>;
   }
 
   if (!user) {
-    return <p className="text-center p-10">Could not load profile.</p>;
+    return <div className="text-center p-10 min-h-screen">Could not load profile.</div>;
   }
 
   return (
-    <div className="container mx-auto p-4 md:p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">My Profile</h1>
-        <Link href="/dashboard">
-          <button className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition-colors duration-300">
-            &larr; Back to Dashboard
-          </button>
-        </Link>
-      </div>
+    <div>
+      <Navbar />
+      <main className="container mx-auto p-4 md:p-6">
+        <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-6">My Profile</h1>
 
-      <div className="bg-white p-6 rounded-lg shadow-md max-w-lg mx-auto">
-        <div className="mb-4">
-          <p className="text-sm text-gray-500">Full Name</p>
-          <p className="text-lg font-semibold">{user.name}</p>
+        <div className="bg-white p-6 md:p-8 rounded-lg shadow-lg max-w-2xl mx-auto">
+          <div className="flex items-center space-x-6 mb-8">
+            {/* Avatar Placeholder */}
+            <div className="w-24 h-24 bg-gray-200 rounded-full flex items-center justify-center">
+              <span className="text-4xl text-gray-500">{user.name.charAt(0)}</span>
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold text-gray-800">{user.name}</h2>
+              <p className="text-gray-600">{user.email}</p>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <div className="p-4 bg-gray-50 rounded-lg">
+              <p className="text-sm text-gray-500">Role</p>
+              <p className="text-lg font-semibold capitalize">{user.role.toLowerCase()}</p>
+            </div>
+            <div className="p-4 bg-gray-50 rounded-lg">
+              <p className="text-sm text-gray-500">Total Points</p>
+              <p className="text-lg font-semibold text-green-600">{user.points}</p>
+            </div>
+            <div className="p-4 bg-gray-50 rounded-lg">
+              <p className="text-sm text-gray-500">Member Since</p>
+              <p className="text-lg font-semibold">{new Date(user.createdAt).toLocaleDateString()}</p>
+            </div>
+          </div>
         </div>
-        <div className="mb-4">
-          <p className="text-sm text-gray-500">Email Address</p>
-          <p className="text-lg font-semibold">{user.email}</p>
-        </div>
-        <div className="mb-4">
-          <p className="text-sm text-gray-500">Role</p>
-          <p className="text-lg font-semibold capitalize">{user.role.toLowerCase()}</p>
-        </div>
-        <div>
-          <p className="text-sm text-gray-500">Total Points</p>
-          <p className="text-lg font-semibold text-green-600">{user.points}</p>
-        </div>
-      </div>
+      </main>
     </div>
   );
 }
