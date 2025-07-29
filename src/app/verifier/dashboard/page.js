@@ -15,42 +15,42 @@ export default function VerifierDashboard() {
   const [wasteAmount, setWasteAmount] = useState('');
   const [completingJourneyId, setCompletingJourneyId] = useState(null);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const meResponse = await axios.get('/api/users/me');
-        if (meResponse.data.data.role !== 'VERIFIER') {
-          toast.error('Access Denied.');
-          router.push('/dashboard');
-          return;
-        }
-        setVerifier(meResponse.data.data);
-
-        const journeysResponse = await axios.get('/api/verifier/journeys');
-        setActiveJourneys(journeysResponse.data.data);
-      } catch (err) {
-        toast.error('Session expired. Please log in again.');
-        router.push('/login');
-      } finally {
-        setLoading(false);
+  const fetchData = async () => {
+    try {
+      const meResponse = await axios.get('/api/users/me');
+      if (meResponse.data.data.role !== 'VERIFIER') {
+        toast.error('Access Denied.');
+        router.push('/dashboard');
+        return;
       }
-    };
+      setVerifier(meResponse.data.data);
+
+      const journeysResponse = await axios.get('/api/verifier/journeys');
+      setActiveJourneys(journeysResponse.data.data);
+    } catch (err) {
+      toast.error('Session expired. Please log in again.');
+      router.push('/login');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchData();
   }, [router]);
 
- const handleStartJourney = async (e) => {
+  const handleStartJourney = async (e) => {
     e.preventDefault();
     const toastId = toast.loading('Starting journey...');
     try {
       await axios.post('/api/journey/start', { trekkerEmail });
       setTrekkerEmail('');
       toast.success('Journey started successfully!', { id: toastId });
-      fetchData();
+      fetchData(); 
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to start journey.', { id: toastId });
     }
   };
-
   const handleCompleteJourney = async (e) => {
     e.preventDefault();
     const toastId = toast.loading('Completing journey...');
@@ -59,15 +59,18 @@ export default function VerifierDashboard() {
         journeyId: completingJourneyId,
         wasteCollectedKg: parseFloat(wasteAmount),
       });
+      toast.success('Journey completed successfully!', { id: toastId });
+      setActiveJourneys(prevJourneys =>
+        prevJourneys.filter(journey => journey._id !== completingJourneyId)
+      );
       setWasteAmount('');
       setCompletingJourneyId(null);
-      toast.success('Journey completed successfully!', { id: toastId });
-      fetchData();
+
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to complete journey.', { id: toastId });
     }
   };
-  
+
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center">Loading Verifier Panel...</div>;
   }
@@ -76,15 +79,12 @@ export default function VerifierDashboard() {
     <div>
       <Navbar />
       <main className="container mx-auto p-4 md:p-6">
-        {/* Header */}
         <div className="mb-8">
             <h1 className="text-3xl md:text-4xl font-bold text-gray-800">Verifier Control Panel</h1>
             <p className="text-gray-600">Managing journeys for: <span className="font-semibold text-green-600">{verifier?.assignedLocation?.name || 'your assigned location'}</span></p>
         </div>
-        
-        {/* On mobile, this will be a single column. On medium screens and up, a 3-column grid. */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="md:col-span-1 space-y-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-1 space-y-6">
                 <div className="bg-white p-6 rounded-lg shadow-md text-center">
                     <h2 className="text-lg font-semibold text-gray-500 uppercase">Active Journeys</h2>
                     <p className="text-6xl font-extrabold text-blue-600">{activeJourneys.length}</p>
@@ -100,7 +100,7 @@ export default function VerifierDashboard() {
                     </form>
                 </div>
             </div>
-            <div className="md:col-span-2 bg-white p-6 rounded-lg shadow-md">
+            <div className="lg:col-span-2 bg-white p-6 rounded-lg shadow-md">
                 <h2 className="text-xl font-semibold mb-4">Current Active Journeys</h2>
                 <div className="space-y-4">
                     {activeJourneys.length > 0 ? (
@@ -111,8 +111,8 @@ export default function VerifierDashboard() {
                             {completingJourneyId === journey._id ? (
                                <form onSubmit={handleCompleteJourney} className="mt-4 flex gap-2 items-center">
                                  <input type="number" step="0.1" value={wasteAmount} onChange={(e) => setWasteAmount(e.target.value)} placeholder="Waste (kg)" required className="block w-full px-3 py-2 border rounded-md text-black"/>
-                                 <button type="submit" className="bg-green-500 text-white py-2 px-3 rounded-lg">✓</button>
-                                 <button type="button" onClick={() => setCompletingJourneyId(null)} className="bg-gray-500 text-white py-2 px-3 rounded-lg">X</button>
+                                 <button type="submit" className="bg-green-500 text-white py-2 px-3 rounded-lg hover:bg-green-600">✓</button>
+                                 <button type="button" onClick={() => setCompletingJourneyId(null)} className="bg-gray-500 text-white py-2 px-3 rounded-lg hover:bg-gray-600">X</button>
                                </form>
                             ) : (
                               <button onClick={() => setCompletingJourneyId(journey._id)} className="mt-3 w-full bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-lg">
