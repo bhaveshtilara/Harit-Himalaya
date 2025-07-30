@@ -10,7 +10,20 @@ export async function GET(request) {
     if (!tokenData || tokenData.role !== 'ADMIN') {
       return NextResponse.json({ error: 'Not authorized' }, { status: 403 });
     }
-    const users = await User.find({}).select('-password').sort({ createdAt: -1 });
+    const { searchParams } = new URL(request.url);
+    const searchTerm = searchParams.get('search') || '';
+    const query = searchTerm
+      ? {
+          $or: [
+            { name: { $regex: searchTerm, $options: 'i' } }, 
+            { email: { $regex: searchTerm, $options: 'i' } },
+          ],
+        }
+      : {};
+
+    const users = await User.find(query)
+      .select('-password')
+      .sort({ createdAt: -1 });
 
     return NextResponse.json({
       success: true,

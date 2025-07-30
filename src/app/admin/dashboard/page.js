@@ -1,9 +1,10 @@
 "use client";
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import Navbar from '@/components/Navbar';
+
 const StatCard = ({ title, value, icon }) => (
   <div className="bg-white p-6 rounded-lg shadow-md">
     <div className="flex items-center">
@@ -25,12 +26,12 @@ export default function AdminDashboard() {
   
   const [newLocation, setNewLocation] = useState({ name: '', trailName: '' });
   const [editingUser, setEditingUser] = useState(null);
-
-  const fetchData = async () => {
+  const [searchTerm, setSearchTerm] = useState('');
+  const fetchData = useCallback(async (currentSearchTerm = '') => {
     try {
       const [statsRes, usersRes, locationsRes] = await Promise.all([
         axios.get('/api/admin/stats'),
-        axios.get('/api/admin/users'),
+        axios.get(`/api/admin/users?search=${currentSearchTerm}`), 
         axios.get('/api/locations'),
       ]);
       setStats(statsRes.data.data);
@@ -42,11 +43,14 @@ export default function AdminDashboard() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [router]);
 
   useEffect(() => {
-    fetchData();
-  }, [router]);
+    const delayDebounceFn = setTimeout(() => {
+      fetchData(searchTerm);
+    }, 500); 
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchTerm, fetchData]);
   
   const handleLocationSubmit = async (e) => {
     e.preventDefault();
@@ -55,12 +59,11 @@ export default function AdminDashboard() {
       await axios.post('/api/locations', newLocation);
       toast.success('Location created successfully!', { id: toastId });
       setNewLocation({ name: '', trailName: '' });
-      fetchData();
+      fetchData(searchTerm); 
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to create location.', { id: toastId });
     }
   };
-
   const handleUserUpdate = async (e) => {
     e.preventDefault();
     const toastId = toast.loading('Updating user...');
@@ -72,13 +75,13 @@ export default function AdminDashboard() {
       });
       toast.success('User updated successfully!', { id: toastId });
       setEditingUser(null);
-      fetchData();
+      fetchData(searchTerm); 
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to update user.', { id: toastId });
     }
   };
 
-  if (loading) {
+  if (loading && !users.length) { 
       return (
         <div>
             <Navbar/>
@@ -97,13 +100,21 @@ export default function AdminDashboard() {
                 <StatCard title="Total Locations" value={stats.locations} icon={'📍'}/>
                 <StatCard title="Journeys Completed" value={stats.completedJourneys} icon={'✅'}/>
             </div>
-
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="lg:col-span-2 bg-white p-6 rounded-lg shadow-md">
-                  <h2 className="text-2xl font-semibold mb-4">User Management</h2>
+                  <div className="flex flex-col md:flex-row justify-between md:items-center mb-4 gap-4">
+                    <h2 className="text-2xl font-semibold">User Management</h2>
+                    <input
+                      type="text"
+                      placeholder="Search by name or email..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="w-full md:w-1/2 px-3 py-2 border border-gray-300 rounded-md shadow-sm text-black"
+                    />
+                  </div>
                   <div className="overflow-x-auto">
                     <table className="min-w-full">
-                      <thead className="bg-gray-100"><tr><th className="py-2 px-4 text-left">Name</th><th className="py-2 px-4 text-left">Role</th><th className="py-2 px-4 text-left">Status</th><th className="py-2 px-4 text-left">Actions</th></tr></thead>
+                      <thead className="bg-gray-100"><tr><th className="py-2 px-4 text-left">Name / Email</th><th className="py-2 px-4 text-left">Role</th><th className="py-2 px-4 text-left">Status</th><th className="py-2 px-4 text-left">Actions</th></tr></thead>
                       <tbody>
                         {users.map((user) => (
                           <tr key={user._id} className="border-b hover:bg-gray-50">
@@ -113,9 +124,7 @@ export default function AdminDashboard() {
                             </td>
                             <td className="py-2 px-4">{user.role}</td>
                             <td className="py-2 px-4">
-                              <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                                user.status === 'ACTIVE' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                              }`}>
+                              <span className={`px-2 py-1 text-xs font-semibold rounded-full ${user.status === 'ACTIVE' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
                                 {user.status}
                               </span>
                             </td>
