@@ -4,8 +4,6 @@ import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import Navbar from '@/components/Navbar';
-
-// A simple stat card component
 const StatCard = ({ title, value, icon }) => (
   <div className="bg-white p-6 rounded-lg shadow-md">
     <div className="flex items-center">
@@ -57,11 +55,12 @@ export default function AdminDashboard() {
       await axios.post('/api/locations', newLocation);
       toast.success('Location created successfully!', { id: toastId });
       setNewLocation({ name: '', trailName: '' });
-      fetchData(); 
+      fetchData();
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to create location.', { id: toastId });
     }
   };
+
   const handleUserUpdate = async (e) => {
     e.preventDefault();
     const toastId = toast.loading('Updating user...');
@@ -73,7 +72,7 @@ export default function AdminDashboard() {
       });
       toast.success('User updated successfully!', { id: toastId });
       setEditingUser(null);
-      fetchData(); 
+      fetchData();
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to update user.', { id: toastId });
     }
@@ -144,7 +143,6 @@ export default function AdminDashboard() {
                   </form>
                 </div>
             </div>
-
             {editingUser && (
               <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center p-4">
                 <div className="bg-white p-8 rounded-lg shadow-xl w-full max-w-md">
@@ -160,7 +158,7 @@ export default function AdminDashboard() {
                     </div>
                     <div className="mb-4">
                       <label className="text-sm font-medium">Status</label>
-                      <select value={editingUser.status} onChange={(e) => setEditingUser({...editingUser, status: e.g.target.value})} className="mt-1 block w-full p-2 border rounded-md text-black">
+                      <select value={editingUser.status} onChange={(e) => setEditingUser({...editingUser, status: e.target.value})} className="mt-1 block w-full p-2 border rounded-md text-black">
                         <option value="ACTIVE">Active</option>
                         <option value="BLOCKED">Blocked</option>
                       </select>
