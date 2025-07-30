@@ -3,7 +3,7 @@ import dbConnect from '@/lib/dbConnect';
 import User from '@/models/user.model';
 import { NextResponse } from 'next/server';
 
-export async function PUT(request, { params }) {
+export async function PUT(request, context) {
   await dbConnect();
   try {
     const tokenData = getDataFromToken(request);
@@ -11,13 +11,29 @@ export async function PUT(request, { params }) {
       return NextResponse.json({ error: 'Not authorized' }, { status: 403 });
     }
 
-    const { userId } = params;
+    // --- NEW WORKAROUND: Manually parse the ID from the URL ---
+    const urlParts = request.nextUrl.pathname.split('/');
+    const userId = urlParts[urlParts.length - 1];
+    // This bypasses the problematic context.params object entirely.
+    // --- END OF WORKAROUND ---
+
     const { role, assignedLocation, status } = await request.json();
+
+    if (!userId) {
+        return NextResponse.json({ success: false, message: 'User ID not found in URL.' }, { status: 400 });
+    }
+
+    if (role === 'VERIFIER' && !assignedLocation) {
+      return NextResponse.json(
+        { success: false, message: 'A location must be assigned to a user with the VERIFIER role.' },
+        { status: 400 }
+      );
+    }
 
     const updateData = {};
     if (role) updateData.role = role;
     if (status) updateData.status = status;
-    updateData.assignedLocation = assignedLocation || null;
+    updateData.assignedLocation = (role === 'VERIFIER') ? assignedLocation : null;
 
     const updatedUser = await User.findByIdAndUpdate(
       userId,

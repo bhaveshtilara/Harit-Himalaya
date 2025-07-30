@@ -26,12 +26,14 @@ export default function AdminDashboard() {
   
   const [newLocation, setNewLocation] = useState({ name: '', trailName: '' });
   const [editingUser, setEditingUser] = useState(null);
+  
   const [searchTerm, setSearchTerm] = useState('');
+
   const fetchData = useCallback(async (currentSearchTerm = '') => {
     try {
       const [statsRes, usersRes, locationsRes] = await Promise.all([
         axios.get('/api/admin/stats'),
-        axios.get(`/api/admin/users?search=${currentSearchTerm}`), 
+        axios.get(`/api/admin/users?search=${currentSearchTerm}`),
         axios.get('/api/locations'),
       ]);
       setStats(statsRes.data.data);
@@ -48,7 +50,8 @@ export default function AdminDashboard() {
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
       fetchData(searchTerm);
-    }, 500); 
+    }, 500);
+
     return () => clearTimeout(delayDebounceFn);
   }, [searchTerm, fetchData]);
   
@@ -59,13 +62,20 @@ export default function AdminDashboard() {
       await axios.post('/api/locations', newLocation);
       toast.success('Location created successfully!', { id: toastId });
       setNewLocation({ name: '', trailName: '' });
-      fetchData(searchTerm); 
+      fetchData(searchTerm);
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to create location.', { id: toastId });
     }
   };
+
   const handleUserUpdate = async (e) => {
     e.preventDefault();
+
+    if (editingUser.role === 'VERIFIER' && !editingUser.assignedLocation) {
+      toast.error('Please assign a location before setting the role to VERIFIER.');
+      return;
+    }
+
     const toastId = toast.loading('Updating user...');
     try {
       await axios.put(`/api/admin/users/${editingUser._id}`, {
@@ -75,13 +85,13 @@ export default function AdminDashboard() {
       });
       toast.success('User updated successfully!', { id: toastId });
       setEditingUser(null);
-      fetchData(searchTerm); 
+      fetchData(searchTerm);
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to update user.', { id: toastId });
     }
   };
 
-  if (loading && !users.length) { 
+  if (loading && !users.length) {
       return (
         <div>
             <Navbar/>
