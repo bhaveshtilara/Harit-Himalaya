@@ -4,6 +4,8 @@ import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import Navbar from '@/components/Navbar';
+
+// A simple stat card component
 const StatCard = ({ title, value, icon }) => (
   <div className="bg-white p-6 rounded-lg shadow-md">
     <div className="flex items-center">
@@ -25,6 +27,7 @@ export default function AdminDashboard() {
   
   const [newLocation, setNewLocation] = useState({ name: '', trailName: '' });
   const [editingUser, setEditingUser] = useState(null);
+
   const fetchData = async () => {
     try {
       const [statsRes, usersRes, locationsRes] = await Promise.all([
@@ -46,6 +49,7 @@ export default function AdminDashboard() {
   useEffect(() => {
     fetchData();
   }, [router]);
+  
   const handleLocationSubmit = async (e) => {
     e.preventDefault();
     const toastId = toast.loading('Creating location...');
@@ -94,12 +98,13 @@ export default function AdminDashboard() {
                 <StatCard title="Total Locations" value={stats.locations} icon={'📍'}/>
                 <StatCard title="Journeys Completed" value={stats.completedJourneys} icon={'✅'}/>
             </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="lg:col-span-2 bg-white p-6 rounded-lg shadow-md">
                   <h2 className="text-2xl font-semibold mb-4">User Management</h2>
                   <div className="overflow-x-auto">
                     <table className="min-w-full">
-                      <thead className="bg-gray-100"><tr><th className="py-2 px-4 text-left">Name / Email</th><th className="py-2 px-4 text-left">Role</th><th className="py-2 px-4 text-left">Status</th><th className="py-2 px-4 text-left">Actions</th></tr></thead>
+                      <thead className="bg-gray-100"><tr><th className="py-2 px-4 text-left">Name</th><th className="py-2 px-4 text-left">Role</th><th className="py-2 px-4 text-left">Status</th><th className="py-2 px-4 text-left">Actions</th></tr></thead>
                       <tbody>
                         {users.map((user) => (
                           <tr key={user._id} className="border-b hover:bg-gray-50">
@@ -139,6 +144,7 @@ export default function AdminDashboard() {
                   </form>
                 </div>
             </div>
+
             {editingUser && (
               <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center p-4">
                 <div className="bg-white p-8 rounded-lg shadow-xl w-full max-w-md">
@@ -154,7 +160,7 @@ export default function AdminDashboard() {
                     </div>
                     <div className="mb-4">
                       <label className="text-sm font-medium">Status</label>
-                      <select value={editingUser.status} onChange={(e) => setEditingUser({...editingUser, status: e.target.value})} className="mt-1 block w-full p-2 border rounded-md text-black">
+                      <select value={editingUser.status} onChange={(e) => setEditingUser({...editingUser, status: e.g.target.value})} className="mt-1 block w-full p-2 border rounded-md text-black">
                         <option value="ACTIVE">Active</option>
                         <option value="BLOCKED">Blocked</option>
                       </select>

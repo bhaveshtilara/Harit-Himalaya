@@ -7,6 +7,9 @@ const inter = Inter({ subsets: ['latin'] });
 export const metadata = {
   title: 'Harit Himalaya',
   description: 'A community-driven initiative to keep our sacred mountains pristine.',
+  icons: {
+    icon: '/favicon.ico', 
+  },
 };
 export default function RootLayout({ children }: { children: ReactNode }) { 
   return (

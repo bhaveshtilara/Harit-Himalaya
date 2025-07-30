@@ -1,7 +1,5 @@
 "use client";
 import Link from 'next/link';
-
-// Simple SVG icons for the "How it Works" section
 const TrekIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-4-4-6 6"/><path d="m18 12-6-6"/></svg>;
 const VerifyIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="m9 12 2 2 4-4"/></svg>;
 const ImpactIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3v18h18"/><path d="M18.7 8a2.3 2.3 0 0 0-3.2 0l-4.3 4.3a2.3 2.3 0 0 0 0 3.2l4.3 4.3a2.3 2.3 0 0 0 3.2-3.2Z"/></svg>;
@@ -10,7 +8,6 @@ const ImpactIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="48" heig
 export default function HomePage() {
   return (
     <div className="bg-white text-gray-800">
-      {/* --- Hero Section --- */}
       <section
         className="relative flex items-center justify-center min-h-screen text-white text-center px-4"
         style={{
@@ -42,8 +39,6 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-
-      {/* --- Problem Section --- */}
       <section className="py-20 bg-gray-50">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">A Paradise in Peril</h2>
@@ -66,8 +61,6 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-
-      {/* --- How It Works Section --- */}
       <section className="py-20">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-12">Be the Solution. It's Simple.</h2>
@@ -91,7 +84,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* --- Final CTA Section --- */}
       <section className="bg-gray-800 text-white py-20">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl md:text-4xl font-bold">Ready to Make a Difference?</h2>
@@ -107,8 +99,6 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-      
-      {/* --- Footer --- */}
       <footer className="bg-gray-900 text-gray-400 py-6">
           <div className="container mx-auto px-4 text-center">
               <p>&copy; 2025 Harit Himalaya. Built for a cleaner tomorrow.</p>

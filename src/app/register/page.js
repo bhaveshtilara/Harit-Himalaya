@@ -32,8 +32,6 @@ export default function RegisterPage() {
         email: user.email,
         password: user.password,
       });
-
-      // --- NEW, MORE ROBUST TOAST LOGIC ---
       await toast.promise(apiCallPromise, {
         loading: 'Creating account...',
         success: 'Registration successful! Please log in.',

@@ -12,7 +12,8 @@ export async function PUT(request, { params }) {
     }
 
     const { userId } = params;
-    const { role, assignedLocation, status } = await request.json(); 
+    const { role, assignedLocation, status } = await request.json();
+
     const updateData = {};
     if (role) updateData.role = role;
     if (status) updateData.status = status;
